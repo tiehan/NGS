@@ -1,0 +1,94 @@
+#两个文件，一个fasta文件，一个OTU文件(每个otu包含很多序列名)。给定每条序列的酶切位点，统计每条序列被切割后片段的长度，最后统计每个otu中不同序列名对应长度的数目
+#1,确定两个文件的位置，调用re,并初始化变量名
+import os
+os.chdir('E:\\py\\lc2\\arc_trflp')  #修改名字
+import re
+num=[]
+num2=[]
+num3=[]
+seq=[]
+myset=[]
+meiqie={}
+otu={}
+otu2={}
+otu3={}
+ 
+#2,统计fasta文件中每条序列被切割后的长度
+if os.path.exists("arc.fasta"):  #修改名字
+    data=open('arc.fasta')      #修改名字
+    for each_line in data:
+        if '>' in each_line:
+            results=re.search('>(\S+)',each_line)
+            num.append(results.group(1))
+        else:
+            result=re.split('TCGA',each_line)    #修改TCGA
+            seq.append(len(result[0])+1)          ##修改加1
+    #print(num)
+    #print(seq)
+    data.close()
+else:
+    print('The data file is missing2')
+ 
+number=0
+for ab in num:
+    meiqie[ab]=seq[number]
+    number=number+1
+    #print(ab+"\t"+str(meiqie[ab]))
+ 
+#3,将otu文件中otu分成编号与所包含的序列
+if os.path.exists("final.an.0.02.rep.names"):                #修改名字
+    data2=open('final.an.0.02.rep.names')                  #修改名字           
+    for each_line2 in data2:
+        result2=re.split('\t',each_line2)
+        num2.append(result2[0])
+        num3.append(result2[1])
+    data2.close()
+    #print(num2)
+    #print(num3)
+else:
+    print('The data file is missing')
+ 
+k=0
+for ac in num2:
+    otu[ac]=num3[k]
+    k=k+1
+    #print(otu[ac])
+ 
+#4,将otu文件中序列名与长度对应
+for (dd,xx) in otu.items():
+    xx=xx.strip()
+    otu2[dd]=re.split(',',xx)
+    bian=[]
+    for bianhao in otu2[dd]:
+        if bianhao in meiqie.keys():
+            bian.append(meiqie[bianhao])
+        else:
+            print("Can't find "+bianhao+"in the seqs")
+    otu3[dd]=bian
+           
+#print(otu3)
+ 
+#5,保存文件
+out=open('meiqie.txt','w')
+print("rep_otu\ttotal_sequences\tcout",file=out)
+for (mm,nn) in otu3.items():
+    number4=len(nn)
+    a={}
+    for i in nn:
+        a[i] = nn.count(i)
+    print(mm+'\t'+str(number4)+"\t"+str(a),file=out)
+   
+ 
+ 
+out.close()
+ 
+#6,最后的结果
+rep_otu    total_sequences      cout
+A151_37  2       {95: 2}
+A30_23    3       {393: 3}
+A151_13  23     {393: 23}
+A19_49    1       {186: 1}
+A19_7       10     {186: 9, 76: 1}
+A19_41    1       {446: 1}
+A19_11    1       {284: 1}
+A151_33  64     {283: 1, 284: 61, 286: 2}
